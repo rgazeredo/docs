@@ -1,16 +1,16 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
+    "title": "UAZAPI",
+    "description": "API para envio de mensagens via WhatsApp usando a UAZAPI.",
+    "version": "1.0.0",
     "license": {
-      "name": "MIT"
-    },
-    "version": "1.0.0"
+      "name": "Proprietary"
+    }
   },
   "servers": [
     {
-      "url": "http://sandbox.mintlify.com"
+      "url": "https://api.uazapi.com"
     }
   ],
   "security": [
@@ -19,54 +19,19 @@
     }
   ],
   "paths": {
-    "/plants": {
-      "get": {
-        "description": "xxReturns all plants from the system that the user has access to",
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of results to return",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      },
+    "/send~text": {
       "post": {
-        "description": "Creates a new plant in the store",
+        "description": "Envia uma mensagem de texto para um número específico.",
         "requestBody": {
-          "description": "Plant to add to the store",
+          "description": "Dados da mensagem de texto a ser enviada.",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewPlant"
+                "$ref": "#/components/schemas/SendTextRequest"
+              },
+              "example": {
+                "number": "5511999999999",
+                "text": "Olá, tudo bem?"
               }
             }
           },
@@ -74,79 +39,33 @@
         },
         "responses": {
           "200": {
-            "description": "plant response",
+            "description": "Mensagem enviada com sucesso",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Plant"
+                  "$ref": "#/components/schemas/SendTextResponse"
+                },
+                "example": {
+                  "status": "success",
+                  "messageId": "abc123",
+                  "to": "5511999999999"
                 }
               }
             }
           },
           "400": {
-            "description": "unexpected error",
+            "description": "Erro na requisição",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": 400,
+                  "message": "Número inválido ou campo obrigatório ausente."
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID of plant to delete",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
-          },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  "webhooks": {
-    "/plant/webhook": {
-      "post": {
-        "description": "Information about a new plant added to the store",
-        "requestBody": {
-          "description": "Plant added to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Return a 200 status to indicate that the data was received successfully"
           }
         }
       }
@@ -154,55 +73,49 @@
   },
   "components": {
     "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
+      "SendTextRequest": {
         "type": "object",
+        "required": ["number", "text"],
         "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
+          "number": {
+            "type": "string",
+            "description": "Número do destinatário no formato E.164 (ex: 5511999999999)."
           },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
+          "text": {
+            "type": "string",
+            "description": "Mensagem de texto a ser enviada."
           }
         }
       },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
+      "SendTextResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Status do envio da mensagem (ex: success, error)."
           },
-          {
-            "required": [
-              "id"
-            ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
-              }
-            }
+          "messageId": {
+            "type": "string",
+            "description": "Identificador único da mensagem."
+          },
+          "to": {
+            "type": "string",
+            "description": "Número de destino."
           }
-        ]
+        }
       },
       "Error": {
-        "required": [
-          "error",
-          "message"
-        ],
         "type": "object",
+        "required": ["error", "message"],
         "properties": {
           "error": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "description": "Código do erro"
           },
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "Descrição do erro"
           }
         }
       }
