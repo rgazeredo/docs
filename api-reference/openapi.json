@@ -152,6 +152,59 @@
       }
     }
   },
+  "send-text": {
+    "/send/text": {
+      "post": {
+        "description": "Envia uma mensagem de texto para um número específico.",
+        "requestBody": {
+          "description": "Dados da mensagem de texto a ser enviada.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendTextRequest"
+              },
+              "example": {
+                "number": "5511999999999",
+                "text": "Olá, tudo bem?"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Mensagem enviada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendTextResponse"
+                },
+                "example": {
+                  "status": "success",
+                  "messageId": "abc123",
+                  "to": "5511999999999"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro na requisição",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": 400,
+                  "message": "Número inválido ou campo obrigatório ausente."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
   "components": {
     "schemas": {
       "Plant": {
